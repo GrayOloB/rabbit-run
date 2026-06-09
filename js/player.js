@@ -96,6 +96,11 @@ export class Player {
         }
         this.x = nextX;
         this.y = nextY;
+       // this.x = Math.max(0+CONFIG.SCALED_TILE*2,
+        //     Math.min(this.x, map.pixelWidth - this.width-CONFIG.SCALED_TILE*2));
+
+        //this.y = Math.max(0+CONFIG.SCALED_TILE*2,
+          //   Math.min(this.y, map.pixelHeight - this.height-CONFIG.SCALED_TILE*2));
     }
     startAttack(){
         this.attacking = true;

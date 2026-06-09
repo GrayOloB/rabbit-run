@@ -14,3 +14,14 @@
 // ============================================================================
 
 // TODO: build this file here.
+
+import { CONFIG } from "./config.js";
+import { Images } from "./assets.js";
+
+export class NPC{
+    constructor(x,y){
+        this.x = x;
+        this.y = y;
+
+    }
+}

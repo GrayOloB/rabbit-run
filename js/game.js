@@ -30,6 +30,7 @@ import { Input } from "./input.js";
 import { TileMap } from "./tilemap.js";
 import { Camera } from "./camera.js";
 import { Player } from "./player.js";
+import { NPC } from "./npc.js";
 
 class Game {
     constructor(canvas) {
