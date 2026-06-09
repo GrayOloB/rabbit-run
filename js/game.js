@@ -58,7 +58,7 @@ class Game {
         requestAnimationFrame(this.loop.bind(this))
     }
     update(dt){
-        this.player.update(dt);
+        this.player.update(dt, this.map);
         this.camera.follow(this.player, this.map);
     }
     draw(){

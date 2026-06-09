@@ -20,7 +20,11 @@ export const CONFIG = {
     VIEW_TILES_Y : 12, //number of tiles seen by the camera in the y direction
     PLAYER_SPEED : 190, //pixels moved per second
     PLAYER_FRAME_SIZE : 48, //Pixel size of player character
-    SOLID_TOP_INSET : 16 //remove unneeded pixels of solid tiles
+
+    SOLID_TOP_INSET : 16, //remove unneeded pixels of solid tiles
+    ANIM_FPS : 8,
+    PLAYER_ATTACK_RANGE: 24,
+    SFX_VOLUME : 0.6
 };
 CONFIG.SCALED_TILE = CONFIG.TILE_SIZE * CONFIG.SCALE;
 CONFIG.CANVAS_WIDTH = CONFIG.VIEW_TILES_X * CONFIG.SCALED_TILE //gives width of canvas in pixels
