@@ -24,7 +24,8 @@ export const CONFIG = {
     SOLID_TOP_INSET : 16, //remove unneeded pixels of solid tiles
     ANIM_FPS : 8,
     PLAYER_ATTACK_RANGE: 24,
-    SFX_VOLUME : 0.6
+    SFX_VOLUME : 0.6,
+    MUSIC_VOLUME : 0.3
 };
 CONFIG.SCALED_TILE = CONFIG.TILE_SIZE * CONFIG.SCALE;
 CONFIG.CANVAS_WIDTH = CONFIG.VIEW_TILES_X * CONFIG.SCALED_TILE //gives width of canvas in pixels

@@ -16,7 +16,7 @@
 // TODO: build this file here.
 
 import { Input } from "./input.js";
-import { Sound } from "./sound.js";
+import { Sound } from "./audio.js";
 
 export class Dialogue{
     constructor(){
@@ -42,7 +42,7 @@ export class Dialogue{
         this.charTimer = 0;
         this.choiceIndex = 0;
         this.onFinish = onFinish;
-        this.onChoice - onChoice
+        this.onChoice = onChoice;
     }
     get currentPage() {return this.pages[this.pageIndex]}
     get currentText() {
@@ -61,11 +61,11 @@ export class Dialogue{
 
         if(!this.fullyTyped){
             this.charTimer += dt;
-            const charstoAdd = Math.floor(this.charTimer * this.charsPerSecond)
+            const charsToAdd = Math.floor(this.charTimer * this.charsPerSecond);
             if(charsToAdd > 0){
-                this.charIndex = Math.min(this.currentText.length, this.charIndex + charstoAdd);
+                this.charIndex = Math.min(this.currentText.length, this.charIndex + charsToAdd);
                 this.charTimer = 0;
-                Sound.play("text")
+                Sound.play("text");
             }
         }
         const choices = this.currentChoices;
