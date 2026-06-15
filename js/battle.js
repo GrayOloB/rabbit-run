@@ -13,3 +13,33 @@
 // ============================================================================
 
 // TODO: build this file here.
+import { CONFIG } from "./config.js";
+import { Sound } from "./audio.js";
+
+export const Battle = {
+    resolvePlayerAttack(player, enemies, questLog){
+        if(!player.attacking || player.attackHasHit) return;
+
+        const swingProgress = 1 - (player.attackTimer / (9 / CONFIG.ANIM_FPS));
+        if(swingProgress < 0.3 || swingProgress > 0.7) return;
+
+        const point = player.getAttackPoint();
+
+        for (const enemy of enemies){
+            if(enemy.state === "dead") continue;
+
+            const inside = point.x >= enemy.x && point.x <= enemy.x + enemy.width
+            && point.y >= enemy.y && point.y <= enemy.y + enemy.height;
+            if(inside){
+                const wasAlive = enemy.hp > 0;
+                enemy.takeDamage(player.attackDamage);
+                player.attackHasHit = true;
+                if (wasAlive && enemy.hp <= 0){
+                    questLog.onDefeat(enemy.type);
+                    player.gainXP(enemy.xpReward)
+                }
+                break;
+            }
+        }
+    }
+}
