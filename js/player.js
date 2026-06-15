@@ -32,16 +32,59 @@ export class Player {
         this.height = 52//CONFIG.SCALED_TILE;
         const spriteSize = CONFIG.PLAYER_FRAME_SIZE * CONFIG.SCALE;
         this.spriteOffsetX = (spriteSize - this.width)/2;
-        this.spriteOffsetY = (spriteSize - this.height)/2;
+        this.spriteOffsetY = 42
 
         this.DIR = DIR.DOWN;
         this.moving = false;
         this.anim = new SpriteAnimator();
+
+        this.hp = CONFIG.PLAYER_MAX_HP;
+        this.maxHp = CONFIG.PLAYER_MAX_HP;
+        this.level = 1;
+        this.xp = 0;
+        this.xpToNext = CONFIG.XP_BASE;
+
+        this.attackDamage = CONFIG.PLAYER_ATTACK_DAMAGE;
+        this.justLeveledTimer = 0;
+
         this.attacking = false;
         this.attackTimer = 0;
+        this.attackHasHit = false;
+        this.invincibleTimer = 0;
 
     }
+
+    gainXP(amount){
+        this.xp += amount;
+        while(this.xp >= this.xpToNext){
+            this.xp -= this.xpToNext;
+            this.levelUp();
+        }
+    }
+
+    levelUp(){
+        this.level += 1;
+        this.maxHp += CONFIG.HP_PER_LEVEL;
+        this.attackDamage += CONFIG.DAMAGE_PER_LEVEL;
+        this.hp = this.maxHp;
+        this.justLeveledTimer = 1.6;
+        this.xpToNext = Math.round(CONFIG.XP_BASE * Math.pow(this.level, CONFIG.XP_GROWTH));
+        Sound.play("quest");
+    }
+
+    heal(amount){
+        this.hp = Math.min(this.maxHp, this.hp + amount);
+        Sound.play("pickup");
+    }
+
+    get body(){
+        return{ x: this.x, y: this.y, w: this.width, h: this.height};
+    }
+
     update(dt,map) {
+        if(this.invincibleTimer > 0) this.invincibleTimer -= dt;
+        if(this.justLeveledTimer > 0) this.justLeveledTimer -= dt;
+
         if(this.attacking){
             this.attackTimer -= dt;
             this.anim.update(dt, FRAMES.sword);
@@ -108,6 +151,25 @@ export class Player {
         this.anim.reset();
         Sound.play("attack");
     }
+
+    getAttackPoint(){
+        const cx = this.x + this.width / 2;
+        const cy = this.y + this.height / 2;
+        const r = CONFIG.PLAYER_ATTACK_RANGE;
+        if(this.dir === DIR.LEFT) return {x:cx-r, y:cy};
+        if(this.dir === DIR.RIGHT) return {x:cx+r, y:cy};
+        if(this.dir === DIR.UP) return {x: cx, y: cy-r};
+        return {x: cx, y:cy + r};
+    }
+
+    takeDamage(amount){
+        if(this.invincibleTimer>0) return;
+        this.hp = Math.max(0, this.hp-amount);
+        this.invincibleTimer = 0.8;
+        Sound.play("hit");
+    }
+
+    get isDead(){ return this.hp <= 0; }
 
     draw(ctx, camera){
         const screenX = Math.round(this.x - this.spriteOffsetX - camera.x);
