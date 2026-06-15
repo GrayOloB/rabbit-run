@@ -34,6 +34,39 @@ function panel(ctx, x, y, w, h){
 }
 export const UI = {
 
+    drawHealth(ctx, player){
+        const x = 12, y = 12, w= 160, hpH = 18, xpH = 10, gap = 6;
+        const panelH = hpH + gap + xpH;
+        panel(ctx, x-4, y-4,w+8, panelH+8);
+
+        ctx.fillStyle = COLORS.hpBack;
+        ctx.fillRect(x,y,w,hpH);
+        ctx.fillStyle = COLORS.hp;
+        ctx.fillRect(x,y,w * (player.hp / player.maxHp), hpH);
+        ctx.fillStyle = COLORS.text;
+        ctx.font = "12px monospace";
+        ctx.textAlign = "left";
+        ctx.fillText(`HP ${player.hp}/${player.maxHp}`, x+6, y+13);
+
+        const xpY = y + hpH + gap;
+        ctx.fillStyle = COLORS.hpBack;
+        ctx.fillRect(x,xpY,w,xpH);
+        ctx.fillStyle = COLORS.accent;
+        ctx.fillRect(x,xpY,w*(player.xp / player.xpToNext), xpH);
+        ctx.fillStyle = COLORS.text;
+        ctx.font = "9px monospace";
+        ctx.fillStyle = COLORS.accent;
+        ctx.fillText(`LV ${player.level}`, x+6, xpY +8);
+        ctx.textAlign = "right";
+        ctx.fillText(`XP ${player.xp}/${player.xpToNext}`, x+w-6, xpY+8);
+        ctx.textAlign = "left";
+        if(player.justLeveledTimer > 0){
+            ctx.fillStyle = COLORS.done;
+            ctx.font = "bold 14px monospace";
+            ctx.fillText("LEVEL UP!", x+2, xpY + xpH + 20);
+        }
+    },
+
     drawQuests(ctx, questLog){
         if(!questLog.hudVisible){
             ctx.fillStyle = COLORS.dim;
@@ -45,11 +78,15 @@ export const UI = {
         const active = questLog.activeQuests();
         if(active.length === 0) return;
 
-        const w = 240, x = CONFIG.CANVAS_WIDTH - w - 12, y = 12;
+        const inProgress = active.filter(q => !q.completed);
+        const done = active.filter(q => q.completed);
+
+        const w = 250, x = CONFIG.CANVAS_WIDTH - w - 12, y = 12;
         let lines = 1;
         for(const q of active) {
             lines += 1 + q.objectives.length;
         }
+        lines += done.length;
         const h = 14 + lines * 16;
         panel(ctx, x, y, w, h);
 
