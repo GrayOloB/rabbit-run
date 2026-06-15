@@ -15,12 +15,12 @@
 import { CONFIG } from "./config.js";
 
 const COLORS = {
-    panel: "#2f4a63b",
+    panel: "#2f4a63",
     panelEdge: "#7fb2dc",
     text: "#f3f8fd",
     dim: "#bcd4ea",
-    hp: "f08a8a",
-    hpBack: "3a5a70",
+    hp: "#f08a8a",
+    hpBack: "#3a5a70",
     accent : "#ffd98a",
     done : "#9ad9b0",
 }
@@ -50,12 +50,12 @@ export const UI = {
         for(const q of active) {
             lines += 1 + q.objectives.length;
         }
-        const h = 14 + lines * 16
-        panel(ctx, x, y, w, h)
+        const h = 14 + lines * 16;
+        panel(ctx, x, y, w, h);
 
-        ctx.textAlign  = "left"
-        let ty = y + 20
-        ctx.fillStyle = COLORS.accent
+        ctx.textAlign  = "left";
+        let ty = y + 20;
+        ctx.fillStyle = COLORS.accent;
         ctx.font = "bold 12px monospace";
         ctx.fillText("QUESTS (Q to hide)", x+10, ty);
         ty += 18;
@@ -108,7 +108,7 @@ export const UI = {
             choices.forEach((c,i) => {
                 const selected = i === dialogue.choiceIndex;
                 ctx.fillStyle = selected ? COLORS.accent : COLORS.dim;
-                ctx.fillText((selected ? "→ " : "    ") + c, x+24,cy)
+                ctx.fillText((selected ? "→ " : "    ") + c, x+24,cy += 18)
             });
         } else if (dialogue.fullyTyped) {
             if(Math.floor(performance.now() / 400) % 2 === 0) {
@@ -118,7 +118,7 @@ export const UI = {
         }
     }, 
     drawInventory(ctx, inventory){
-        ctx.fillStyle = "rgba(0,0,0,0.55";
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillRect(0,0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
         const w = 360, h = 280;
         const x = CONFIG.CANVAS_WIDTH/2 - w/2, y = CONFIG.CANVAS_HEIGHT/2 - h/2;
