@@ -32,25 +32,36 @@ import { TileMap } from "./tilemap.js";
 import { Camera } from "./camera.js";
 import { Player } from "./player.js";
 import { NPC } from "./npc.js";
+import { Enemy } from "./enemy.js"
 import { Item, Inventory } from "./item.js"
 import { QuestLog } from "./quest.js"
 import { Dialogue } from "./dialogue.js";
+import { Battle } from "./battle.js";
 import { UI } from "./ui.js"
 
-const STATE = { PLAYING : "playing", DIALOGUE : "dialogue", INVENTORY : "inventory"}
+const STATE = {
+    LOADING : "loading",
+    TITLE : "title",
+    PLAYING : "playing", 
+    DIALOGUE : "dialogue", 
+    INVENTORY : "inventory",
+    GAMEOVER: "gameover",
+    WIN: "win",
+};
 
 class Game {
     constructor(canvas) {
         this.ctx = canvas.getContext("2d");
         this.ctx.imageSmoothingEnabled = false;
         this.lastTime = 0;
-        this.state = STATE.PLAYING;
+        this.state = STATE.LOADING;
     }
     async boot(){
         await loadAllAssets();
         const res = await fetch("assets/map_meadow.json");
         this.mapData = await res.json();
-        this.loadWorld();
+        this.state = STATE.TITLE
+        //this.loadWorld();
         requestAnimationFrame(this.loop.bind(this))
     }
 
@@ -63,9 +74,11 @@ class Game {
         this.questLog = new QuestLog();
         this.questLog.define(this.mapData.quests || []);
         this.npcs = [];
+        this.enemies = [];
         this.items = [];
         for(const e of this.mapData.entities){
             if (e.kind === "npc") this.npcs.push(new NPC(e));
+            else if (e.kind === "enemy") this.enemies.push(new Enemy(e))
             else if (e.kind === "item") this.items.push(new Item(e));
         }
         Sound.playMusic(this.mapData.music || "town_theme");
@@ -79,24 +92,46 @@ class Game {
         this.update(dt);
         this.draw();
         Input.clearFrame();
-        requestAnimationFrame(this.loop.bind(this))
+        requestAnimationFrame(this.loop.bind(this));
     }
     update(dt){
-       if(this.state === STATE.PLAYING) this.updatePlaying(dt);
-       else if (this.state === STATE.DIALOGUE){
-        this.dialogue.update(dt);
-        if(!this.dialogue.active) this.state = STATE.PLAYING;
-       } else if (this.state === STATE.INVENTORY){
-        if(Input.wasPressed("KeyI") || Input.wasPressed("Escape")) {
-            Sound.play("select"); this.state = STATE.PLAYING;
-        }
+       switch(this.state){
+        case STATE.TITLE:
+            if(Input.wasPressed("Space") || Input.wasPressed("Enter")){
+                this.loadWorld();
+                this.state = STATE.PLAYING;
+            }
+            break;
+        case STATE.PLAYING:
+            this.updatePlaying(dt);
+            break;
+        case STATE.DIALOGUE:
+            this.dialogue.update(dt);
+            if(!this.dialogue.active) this.state = STATE.PLAYING;
+            break;
+       
+       case STATE.INVENTORY:
+            if(Input.wasPressed("KeyI") || Input.wasPressed("Escape")){
+                Sound.play("select");
+                this.state = STATE.PLAYING;
+            }
+            break;
+        case STATE.GAMEOVER:
+        case STATE.WIN:
+            if (Input.wasPressed("Space") || Input.wasPressed("Enter")){
+                this.state = STATE.TITLE
+            }
+            break;
        }
     }
     updatePlaying(dt){
-        if(Input.wasPressed("KeyI")) {Sound.play("select");
-            this.state = STATE.INVENTORY; return;
+        if(Input.wasPressed("KeyI")) {
+            Sound.play("select");
+            this.state = STATE.INVENTORY; 
+            return;
         }
-        if(Input.wasPressed("KeyQ")) {Sound.play("blip");
+        if(Input.wasPressed("KeyQ")) {
+            Sound.play("blip");
             this.questLog.toggleHud();
         }
 
@@ -106,22 +141,48 @@ class Game {
             return;
         }
         this.player.update(dt, this.map);
+
+        if(this.player.isDead){
+            Sound.stopMusic();
+            Sound.play("gameover");
+            this.state = STATE.GAMEOVER;
+            return;
+        }
+
+        Battle.resolvePlayerAttack(this.player, this.enemies, this.questLog);
+
+        for(const enemy of this.enemies){
+            enemy.update(dt, this.player, this.map);
+        }
+        this.enemies = this.enemies.filter(e=>!e.dead);
+
         for(const npc of this.npcs) npc.update(dt);
+
         for(const item of this.items){
             item.update(dt);
             if(!item.collected && item.overlaps(this.player)){
                 item.collected = true;
                 this.inventory.add(item.id, item.name);
                 this.questLog.onCollect(item.id);
+                if(item.heal) this.player.heal(item.heal);
             }
         }
         this.items = this.items.filter(i => !i.collected);
+        
+        const all = Object.values(this.questLog.quests);
+        if(all.length > 0 && all.every(q => q.completed)){
+            Sound.stopMusic();
+            Sound.play("quest");
+            this.state = STATE.WIN;
+        }
+        
         this.camera.follow(this.player, this.map);
     }
 
     startConversation(npc){
         this.state = STATE.DIALOGUE;
         this.questLog.onTalk(npc.name);
+
         const quest = npc.givesQuest ?
         this.questLog.quests[npc.givesQuest] : null;
         let pages = npc.dialogue;
@@ -163,26 +224,51 @@ class Game {
         const ctx = this.ctx;
         ctx.fillStyle = "bfe0f2";
         ctx.fillRect(0,0,CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
+        
+        if(this.state === STATE.LOADING){
+            UI.drawScreen(ctx, "Loading...", "Gathering carrots and courage");
+            return
+        }
+        if(this.state === STATE.TITLE){
+            UI.drawScreen(ctx, "Rabbit Run: Tales of the Warran",
+                "Press Space to begin", "#ffd98a");
+            return;
+        }
+        
         this.map.drawLayer(ctx, "ground", this.camera);
         this.map.drawLayer(ctx, "overlay", this.camera);
 
-        const things = [...this.items, ...this.npcs, this.player];
+        const things = [...this.items, ...this.npcs, ...this.enemies, this.player];
         things.sort((a,b) => (a.y + a.height) - (b.y + b.height));
         for (const t of things) t.draw(ctx, this.camera);
         
         this.map.drawLayer(ctx, "decor", this.camera);
 
+        UI.drawHealth(ctx, this.player);
         UI.drawQuests(ctx, this.questLog);
         if(this.state === STATE.PLAYING && this.nearbyNpc){
             UI.drawPrompt(ctx, `Press T to talk to ${this.nearbyNpc.name}`);
         }
-        if(this.state === STATE.DIALOGUE) UI.drawDialogue(ctx, this.dialogue);
-        if(this.state === STATE.INVENTORY) UI.drawInventory(ctx,this.inventory);
+        if(this.state === STATE.DIALOGUE) {
+            UI.drawDialogue(ctx, this.dialogue);
+        }
+        if(this.state === STATE.INVENTORY) {
+            UI.drawInventory(ctx,this.inventory);
+        }
+        if(this.state === STATE.GAMEOVER){
+            UI.drawScreen(ctx, "Game Over", "Press ENTER to try again", "#f08a8a");
+        }
+        if(this.state === STATE.WIN){
+            UI.drawScreen(ctx, "You Win!", "Every quest complete! Enter for title", "#9ad9b0");
+        }
     }
 }
 window.addEventListener("load", ()=> {
     const canvas = document.getElementById("game");
     canvas.width = CONFIG.CANVAS_WIDTH;
     canvas.height = CONFIG.CANVAS_HEIGHT;
-    new Game(canvas).boot();
+    const game = new Game(canvas);
+
+    window.game = game;
+    game.boot();
 })

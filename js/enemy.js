@@ -66,13 +66,17 @@ export class Enemy{
     get centerY(){ return this.y + this.height/2;}
 
     distanceTo(player){
-        return Math.hypot(this.centerX - (player.x+player.width/2), (player.y+player.height/2));
+       // console.log(this.centerX + " " + this.centerY);
+        return Math.hypot(
+        this.centerX - (player.x + player.width/2),
+        this.centerY - (player.y + player.height/2));
     }
 
     update(dt, player, map){
         if(this.attackCooldown>0) {
             this.attackCooldown -= dt;
         }
+       // console.log(this.distanceTo(player));
         switch (this.state){
             case STATE.DEAD: {
                 this.deadTimer -= dt;
@@ -87,6 +91,7 @@ export class Enemy{
                 this.anim.update(dt, this.def.hurtFrames);
                 if(this.hurtTimer <= 0){
                     this.state = (this.hp <= 0) ? STATE.DEAD : STATE.CHASE;
+                   // console.log(this.state);
                     if (this.state === STATE.DEAD){
                         this.startDeath()
                     }
@@ -95,14 +100,17 @@ export class Enemy{
             }
             case STATE.IDLE: {
                 this.anim.update(dt, this.def.idleFrames);
-                const dist = this.distanceTo(player);
-                if(dist < this.def.sightRange){
-                    this.state = STATE.IDLE;
-                    break;
+               // console.log(this.distanceTo(player) + " " + this.def.sightRange);
+                if (this.distanceTo(player) < this.def.sightRange) {
+                    this.state = STATE.CHASE;
                 }
+                break;
             }
             case STATE.CHASE: {
+                //print(state);
                 this.anim.update(dt, this.def.idleFrames);
+                const dist = this.distanceTo(player);
+                //console.log(dist + " " + this.type)
                 if (dist > this.def.sightRange * 1.5){
                     this.state = STATE.IDLE;
                     break;
@@ -116,6 +124,7 @@ export class Enemy{
                 this.moveAxis(0, stepY, map);
 
                 if (dist < this.def.attackRange && this.attackCooldown <= 0){
+                    player.takeDamage(this.def.damage);
                     this.attackCooldown = 1.0;
                 }
                 break;
@@ -132,6 +141,7 @@ export class Enemy{
     takeDamage(amount){
         if(this.state === STATE.DEAD) return;
         this.hp -= amount;
+        this.state = STATE.HURT;
         this.hurtTimer = 0.25;
         this.anim.reset();
         Sound.play(this.hp <= 0 ? "enemy_down" : "hit");
@@ -146,7 +156,7 @@ export class Enemy{
     draw(ctx, camera){
         const offset = (CONFIG.PLAYER_FRAME_SIZE * CONFIG.SCALE - this.width) / 2;
         const sx = this.x - offset - camera.x;
-        const sy = this.y - ((CONFIG.PLAYER_FRAME_SIZE*CONFIG.SCALE - this.height) + 6 - camera.y);
+        const sy = this.y - (CONFIG.PLAYER_FRAME_SIZE * CONFIG.SCALE - this.height) + 6 - camera.y;
 
         let sheet = this.def.idleSheet, frames = this.def.idleFrames, row = 0;
         if(this.state === STATE.HURT) { 
