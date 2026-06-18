@@ -14,7 +14,7 @@
 // Follow the slides / Coding Companion for this week. If you fall behind,
 // the complete version is in the matching weekN-checkpoint/js/player.js.
 // ============================================================================
-
+//
 // TODO: build this file here.
 import { CONFIG } from "./config.js";
 import { Input } from "./input.js";
