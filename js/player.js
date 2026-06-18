@@ -53,6 +53,8 @@ export class Player {
         this.attackHasHit = false;
         this.invincibleTimer = 0;
 
+        this.trail = [];
+
     }
 
     gainXP(amount){
@@ -84,6 +86,10 @@ export class Player {
     }
 
     update(dt,map) {
+
+        this.trail.push({x:this.x, y:this.y, dir:this.DIR});
+        if(this.trail.length > 6) this.trail.shift();
+
         if(this.invincibleTimer > 0) this.invincibleTimer -= dt;
         if(this.justLeveledTimer > 0) this.justLeveledTimer -= dt;
 
@@ -182,6 +188,14 @@ export class Player {
         const screenY = Math.round(this.y - this.spriteOffsetY - camera.y);
         const sheet = this.attacking ? "bunny_sword" : (this.moving ? "bunny_run" : "bunny_idle");
 
+        this.trail.forEach((t, i) => {
+            //needs to pass camera position like above ^^^^^^^^  
+            const trailX = Math.round(t.x - this.spriteOffsetX - camera.x);
+            const trailY = Math.round(t.y - this.spriteOffsetY - camera.y);
+            ctx.globalAlpha = ((i + 1) / this.trail.length) * 0.4;
+            this.anim.draw(ctx, sheet, t.dir, trailX, trailY);
+        });
+        ctx.globalAlpha = 1;
         this.anim.draw(ctx, sheet, this.DIR, screenX, screenY);
     }
 }
