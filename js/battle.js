@@ -15,7 +15,7 @@
 // TODO: build this file here.
 import { CONFIG } from "./config.js";
 import { Sound } from "./audio.js";
-import { Particles } from "./particles.js";
+import { Floaters, Particles } from "./particles.js";
 
 export const Battle = {
     resolvePlayerAttack(player, enemies, questLog){
@@ -35,12 +35,15 @@ export const Battle = {
             if(inside){
                 //console.log(inside);
                 const wasAlive = enemy.hp > 0;
+                Floaters.spawn(enemy.centerX,enemy.centerY, "-" + player.attackDamage, "#ff8a8a");
                 enemy.takeDamage(player.attackDamage);
                 player.attackHasHit = true;
                 if (wasAlive && enemy.hp <= 0){
                     questLog.onDefeat(enemy.type);
-                    player.gainXP(enemy.xpReward)
-                    Particles.burst(enemy.centerX, enemy.centerY, "#8B0000",5)
+                    player.gainXP(enemy.xpReward);
+                    Floaters.spawn(player.x, player.y, enemy.xpReward, "#ffd98a");
+                    Particles.burst(enemy.centerX, enemy.centerY-10, "#8B0000",5);
+                    
                 }
                 break;
             }

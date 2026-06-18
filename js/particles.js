@@ -66,3 +66,29 @@ export const Particles = {
         for(const p of this.list) p.draw(ctx,camera);
     }
 };
+
+export const Floaters = {
+    list: [],
+    spawn(x,y,text, color = "fff"){
+        this.list.push({x,y,text,color,life:1.1,vy:-34});
+    },
+    update(dt){
+        for (const f of this.list){f.y += f.vy * dt; f.life -=dt;}
+        this.list = this.list.filter(f => f.life > 0);
+    },
+    draw(ctx, camera) {
+        ctx.font = "bold 22px monospace";
+        ctx.textAlign = "center";
+        ctx.lineWidth = 4;
+        for(const f of this.list){
+            ctx.globalAlpha = Math.max(0, f.life/1.1);
+            const sx = f.x - camera.x, sy = f.y - camera.y;
+            ctx.strokeStyle = "rgba(30,20,10,0.85)";
+            ctx.strokeText(f.text,sx,sy);
+            ctx.fillStyle = f.color;
+            ctx.fillText(f.text, sx, sy);
+            ctx.globalAlpha = 1;
+        }
+    },
+
+};

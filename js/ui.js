@@ -25,6 +25,7 @@ const COLORS = {
     done : "#9ad9b0",
 }
 
+
 function panel(ctx, x, y, w, h){
     ctx.fillStyle = COLORS.panel;
     ctx.fillRect(x,y,w,h);

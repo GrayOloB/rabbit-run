@@ -162,6 +162,12 @@ export class Enemy{
         if(this.state === STATE.HURT) { 
             sheet = this.def.hurtSheet;
             frames = this.def.hurtFrames;
+            ctx.save();
+            ctx.globalAlpha = this.hurtTimer/0.25;
+            ctx.filter = "brightness(0) invert(1)";
+            this.anim.draw(ctx, sheet, sx, sy);
+            ctx.filter = "none";
+            ctx.restore();
         }
         if(this.state === STATE.DEAD) { 
             sheet = this.def.deathSheet;
