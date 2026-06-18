@@ -21,6 +21,7 @@ import { Input } from "./input.js";
 import { Images } from "./assets.js";
 import { SpriteAnimator, DIR } from "./sprite.js";
 import { Sound } from "./audio.js"
+import { Particles } from "./particles.js";
 
 const FRAMES = { idle : 5, run : 8, sword : 9}
 
@@ -63,6 +64,7 @@ export class Player {
     }
 
     levelUp(){
+        Particles.burst(this.x,this.y,"#fff2a0", 100)
         this.level += 1;
         this.maxHp += CONFIG.HP_PER_LEVEL;
         this.attackDamage += CONFIG.DAMAGE_PER_LEVEL;

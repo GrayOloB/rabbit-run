@@ -38,6 +38,7 @@ import { QuestLog } from "./quest.js"
 import { Dialogue } from "./dialogue.js";
 import { Battle } from "./battle.js";
 import { UI } from "./ui.js"
+import { Particles } from "./particles.js";
 
 const STATE = {
     LOADING : "loading",
@@ -58,7 +59,7 @@ class Game {
     }
     async boot(){
         await loadAllAssets();
-        const res = await fetch("assets/map_glade.json"); //("assets/map_meadow.json");
+        const res = await fetch("assets/map_glade.json");//("assets/map_meadow.json");
         this.mapData = await res.json();
         this.state = STATE.TITLE
         //this.loadWorld();
@@ -95,6 +96,7 @@ class Game {
         requestAnimationFrame(this.loop.bind(this));
     }
     update(dt){
+        Particles.update(dt);
        switch(this.state){
         case STATE.TITLE:
             if(Input.wasPressed("Space") || Input.wasPressed("Enter")){
@@ -243,7 +245,8 @@ class Game {
         for (const t of things) t.draw(ctx, this.camera);
         
         this.map.drawLayer(ctx, "decor", this.camera);
-
+        Particles.draw(ctx,this.camera);
+        
         UI.drawHealth(ctx, this.player);
         UI.drawQuests(ctx, this.questLog);
         if(this.state === STATE.PLAYING && this.nearbyNpc){

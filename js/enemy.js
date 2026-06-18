@@ -28,12 +28,12 @@ const TYPES = {
     slime : {
         idleSheet: "slime_idle", hurtSheet : "slime_hurt", deathSheet : "slime_death",
         idleFrames : 8, hurtFrames : 2, deathFrames : 4,
-        hp : 10, speed:35, damage:3, sightRange:120, attackRange:30, xp:5,
+        hp : 10, speed:35, damage:3, sightRange:120, attackRange:30, xp:10,
     },
     bat : {
         idleSheet: "bat_idle", hurtSheet : "bat_hurt", deathSheet : "bat_death",
         idleFrames : 4, hurtFrames : 2, deathFrames : 5,
-        hp : 6, speed:60, damage:2, sightRange:160, attackRange:28, xp:4,
+        hp : 6, speed:60, damage:2, sightRange:160, attackRange:28, xp:7,
     },
 };
 
