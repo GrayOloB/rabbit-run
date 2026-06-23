@@ -251,6 +251,8 @@ class Game {
 
         UI.drawHealth(ctx, this.player);
         UI.drawQuests(ctx, this.questLog);
+        UI.drawMap(ctx, this.map, this.player, this.enemies)
+
         if(this.state === STATE.PLAYING && this.nearbyNpc){
             UI.drawPrompt(ctx, `Press T to talk to ${this.nearbyNpc.name}`);
         }

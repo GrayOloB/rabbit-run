@@ -218,5 +218,15 @@ export const UI = {
         }
         ctx.fillText(line,x,y)
     },
+    drawMap(ctx, map, player, enemies){
+        const mmX = CONFIG.CANVAS_WIDTH - 130, mmY = 12, mmW = 118, mmH = 88;
+        const sx = mmW / (map.width * CONFIG.SCALED_TILE); 
+        const sy = mmH / (map.height * CONFIG.SCALED_TILE);
+        ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(mmX, mmY, mmW, mmH);
+        ctx.fillStyle = "#9ad9b0";
+        ctx.fillRect(mmX + player.x*sx, mmY + player.y*sy, 3, 3);
+        ctx.fillStyle = "#f07167"; 
+        for (const e of enemies) ctx.fillRect(mmX + e.x*sx, mmY + e.y*sy, 3, 3);
+    }
 
 };
