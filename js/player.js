@@ -57,6 +57,9 @@ export class Player {
         this.attackTimer = 0;
         this.attackHasHit = false;
         this.invincibleTimer = 0;
+        this.dashTimer = 0; 
+        this.dashCooldown = 0;
+        this.speed = CONFIG.PLAYER_SPEED
 
         this.trail = [];
 
@@ -114,6 +117,14 @@ export class Player {
             return;
         }
         let dx = 0, dy = 0;
+        this.dashTimer -= dt;
+        this.dashCooldown -= dt;
+        if (Input.wasPressed("ShiftLeft") && this.dashCooldown <= 0) {
+            this.dashTimer = 0.18; 
+            this.dashCooldown = 0.6; 
+            this.invincibleTimer = 0.18;
+        }
+        
         if(Input.left) {
             dx -= 1; this.DIR = DIR.LEFT;}
         if(Input.right) {
@@ -128,8 +139,8 @@ export class Player {
         if(this.moving){
             const len = Math.hypot(dx, dy);
             dx /= len; dy /= len;
-            const stepX = dx * CONFIG.PLAYER_SPEED * dt;
-            const stepY = dy * CONFIG.PLAYER_SPEED * dt;
+            const stepX = dx * this.speed * dt;
+            const stepY = dy * this.speed * dt;
 
             this.moveAxis(stepX, 0, map);
             this.moveAxis(0, stepY, map);
@@ -139,6 +150,7 @@ export class Player {
         }
     }
     moveAxis(mx, my, map){
+        this.speed = this.dashTimer > 0 ? CONFIG.PLAYER_SPEED * 3 : CONFIG.PLAYER_SPEED;
         const nextX = this.x + mx;
         const nextY = this.y + my;
         const corners = [
