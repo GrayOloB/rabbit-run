@@ -134,9 +134,16 @@ export class Enemy{
 
     moveAxis(mx, my, map){
         const nx = this.x + mx, ny = this.y + my;
-        if (!map.isSolidAtPixel(nx + this.width/2, ny + this.height/2)){
-            this.x = nx; this.y = ny;
-        }
+        const corners = [
+            [nx,ny],
+            [nx+this.width-1,ny],
+            [nx,ny+this.height-1],
+            [nx+this.width-1, ny+this.height-1],
+        ];
+        for (const [cx, cy] of corners)
+            if(map.isSolidAtPixel(cx,cy)) return;
+        this.x = nx;
+        this.y = ny;
     }
     takeDamage(amount){
         if(this.state === STATE.DEAD) return;

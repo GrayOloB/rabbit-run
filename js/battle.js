@@ -24,7 +24,7 @@ export const Battle = {
         const swingProgress = 1 - (player.attackTimer / (9 / CONFIG.ANIM_FPS));
         if(swingProgress < 0.3 || swingProgress > 0.7) return;
 
-        const point = player.getAttackPoint();
+        const point = player.getAttackBox();
 
         for (const enemy of enemies){
             if(enemy.state === "dead") continue;

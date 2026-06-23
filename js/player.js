@@ -29,11 +29,16 @@ export class Player {
     constructor(x,y){
         this.x = x;
         this.y = y;
-        this.width = 42//CONFIG.SCALED_TILE;
-        this.height = 52//CONFIG.SCALED_TILE;
+
+        const FRAME = CONFIG.PLAYER_FRAME_SIZE
+        const SCALE = CONFIG.SCALE
+        const bodyPx = 16 * SCALE
+        this.width = bodyPx//CONFIG.SCALED_TILE;
+        this.height = bodyPx//CONFIG.SCALED_TILE;
+
         const spriteSize = CONFIG.PLAYER_FRAME_SIZE * CONFIG.SCALE;
-        this.spriteOffsetX = (spriteSize - this.width)/2;
-        this.spriteOffsetY = 42
+        this.spriteOffsetX = 16*SCALE
+        this.spriteOffsetY = 16*SCALE
 
         this.DIR = DIR.DOWN;
         this.moving = false;
@@ -163,15 +168,15 @@ export class Player {
         Sound.play("attack");
     }
 
-    getAttackPoint(){
+    getAttackBox(){
         const cx = this.x + this.width / 2;
         const cy = this.y + this.height / 2;
-        const r = CONFIG.PLAYER_ATTACK_RANGE;
-        if(this.dir === DIR.LEFT) return {x:cx-r, y:cy};
-        if(this.dir === DIR.RIGHT) return {x:cx+r, y:cy};
-        if(this.dir === DIR.UP) return {x: cx, y: cy-r};
-        //console.log({x: cx, y:cy + r})
-        return {x: cx, y:cy + r};
+        const reach = this.width/2 + CONFIG.PLAYER_ATTACK_RANGE;
+        const t = 4
+        if (this.dir === DIR.RIGHT) return { x: cx, y: cy-t, w: reach, h: t*2 };
+        if (this.dir === DIR.LEFT) return { x: cx-reach, y: cy-t, w: reach, h: t*2 };
+        if (this.dir === DIR.UP) return { x: cx-t, y: cy-reach, w: t*2, h: reach };
+        return { x: cx-t, y: cy, w: t*2, h: reach }; 
     }
 
     takeDamage(amount){
@@ -184,6 +189,8 @@ export class Player {
     get isDead(){ return this.hp <= 0; }
 
     draw(ctx, camera){
+
+        
         const screenX = Math.round(this.x - this.spriteOffsetX - camera.x);
         const screenY = Math.round(this.y - this.spriteOffsetY - camera.y);
         const sheet = this.attacking ? "bunny_sword" : (this.moving ? "bunny_run" : "bunny_idle");
@@ -197,5 +204,7 @@ export class Player {
         });
         ctx.globalAlpha = 1;
         this.anim.draw(ctx, sheet, this.DIR, screenX, screenY);
+
+        
     }
 }

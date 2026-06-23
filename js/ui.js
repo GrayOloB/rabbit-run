@@ -115,11 +115,11 @@ export const UI = {
     },
 
     drawPrompt(ctx, text){
+        ctx.font = "13px monospace"
         const w = ctx.measureText(text).width + 24;
         const x = CONFIG.CANVAS_WIDTH/2 - w/2, y = CONFIG.CANVAS_HEIGHT - 150;
         panel(ctx, x, y, w, 28);
         ctx.fillStyle = COLORS.text;
-        ctx.font = "13px monospace";
         ctx.textAlign = "center";
         ctx.fillText(text, CONFIG.CANVAS_WIDTH/2, y+19);
     },
